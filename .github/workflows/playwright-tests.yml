@@ -1,0 +1,128 @@
+name: Playwright E2E Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * *'  # Nightly at 2 AM UTC
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'URL to test against'
+        required: false
+        default: 'http://localhost:3000'
+      test_suite:
+        description: 'Test suite to run (all, smoke, regression)'
+        required: false
+        default: 'smoke'
+
+jobs:
+  e2e-tests:
+    name: E2E Tests (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox]
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: qauser
+          POSTGRES_PASSWORD: qapassword
+          POSTGRES_DB: qaplatform
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+        working-directory: frontend
+
+      - name: Build frontend
+        working-directory: frontend
+        env:
+          NEXT_PUBLIC_USE_MOCK: 'true'
+          GITHUB_PAGES: 'false'
+        run: npm run build
+
+      - name: Start frontend server
+        working-directory: frontend
+        run: |
+          npx serve out -p 3000 &
+          echo "Waiting for server..."
+          sleep 5
+          curl -f http://localhost:3000 || (echo "Server failed to start" && exit 1)
+
+      - name: Run Playwright tests
+        working-directory: frontend
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || 'http://localhost:3000' }}
+          CI: true
+        run: |
+          npx playwright test \
+            --project=${{ matrix.browser }} \
+            --reporter=html,github \
+            || true
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: frontend/playwright-report/
+          retention-days: 30
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.browser }}
+          path: frontend/test-results/
+          retention-days: 30
+
+  report:
+    name: Test Report
+    runs-on: ubuntu-latest
+    needs: e2e-tests
+    if: always()
+
+    steps:
+      - name: Download all reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: playwright-report-*
+          merge-multiple: true
+          path: reports/
+
+      - name: Create summary
+        run: |
+          echo "## E2E Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Tests ran against the QA Platform frontend" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Results" >> $GITHUB_STEP_SUMMARY
+          echo "- Browsers tested: chromium, firefox" >> $GITHUB_STEP_SUMMARY
+          echo "- Reports available as artifacts" >> $GITHUB_STEP_SUMMARY
