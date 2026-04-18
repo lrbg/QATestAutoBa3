@@ -2,19 +2,23 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { USE_MOCK } from '@/lib/api';
 import { useStore } from '@/store/useStore';
-
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 export default function HomePage() {
   const router = useRouter();
   const { isAuthenticated } = useStore();
 
   useEffect(() => {
+    // In mock mode always go to dashboard — no auth needed
+    if (USE_MOCK) {
+      router.replace('/dashboard');
+      return;
+    }
     if (isAuthenticated) {
-      router.replace(`${basePath}/dashboard`);
+      router.replace('/dashboard');
     } else {
-      router.replace(`${basePath}/login`);
+      router.replace('/login');
     }
   }, [isAuthenticated, router]);
 

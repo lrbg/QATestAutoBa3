@@ -7,8 +7,6 @@ import { useStore } from '@/store/useStore';
 import { USE_MOCK } from '@/lib/api';
 import { MOCK_USER } from '@/lib/mock-data';
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-
 export default function DashboardLayout({
   children,
 }: {
@@ -22,12 +20,13 @@ export default function DashboardLayout({
       setAuth(MOCK_USER, 'mock-token');
       return;
     }
-    if (!isAuthenticated) {
-      router.replace(`${basePath}/login`);
+    if (!USE_MOCK && !isAuthenticated) {
+      router.replace('/login');
     }
   }, [isAuthenticated, router, setAuth]);
 
-  if (!isAuthenticated && !USE_MOCK) {
+  // In mock mode, auto-login; skip auth gate
+  if (!USE_MOCK && !isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />

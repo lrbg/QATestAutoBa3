@@ -9,7 +9,6 @@ import { Input } from '@/components/ui/input';
 import { useStore } from '@/store/useStore';
 import { api } from '@/lib/api';
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -36,7 +35,7 @@ export default function RegisterPage() {
       const response = await api.register(form);
       setAuth(response.user, response.access_token);
       addNotification({ type: 'success', title: 'Account created!', message: 'Welcome to QA Platform' });
-      router.replace(`${basePath}/dashboard`);
+      router.replace("/dashboard");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Registration failed. Please try again.';
       setError(message);
@@ -59,7 +58,7 @@ export default function RegisterPage() {
           <h1 className="text-2xl font-bold text-white">Create your account</h1>
           <p className="text-gray-400 mt-2 text-sm">
             Already have an account?{' '}
-            <Link href={`${basePath}/login`} className="text-violet-400 hover:text-violet-300">
+            <Link href="/login" className="text-violet-400 hover:text-violet-300">
               Sign in
             </Link>
           </p>

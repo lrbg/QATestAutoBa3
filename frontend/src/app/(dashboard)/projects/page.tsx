@@ -19,13 +19,12 @@ import { Project } from '@/lib/types';
 import { useStore } from '@/store/useStore';
 import { cn, formatRelativeTime, getStatusBg } from '@/lib/utils';
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 function ProjectCard({ project }: { project: Project }) {
   const passRate = project.passRate || 0;
 
   return (
-    <Link href={`${basePath}/projects/${project.id}`}>
+    <Link href={`/projects/${project.id}`}>
       <div className="group relative bg-gray-900/50 border border-white/10 rounded-xl p-6 hover:border-violet-500/30 hover:bg-gray-900/80 transition-all duration-200 cursor-pointer">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">

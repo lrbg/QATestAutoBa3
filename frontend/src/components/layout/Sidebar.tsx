@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   FolderOpen,
@@ -19,25 +19,27 @@ import {
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store/useStore';
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-
 const navItems = [
-  { href: `${basePath}/dashboard`, label: 'Dashboard', icon: LayoutDashboard },
-  { href: `${basePath}/projects`, label: 'Projects', icon: FolderOpen },
-  { href: `${basePath}/tests`, label: 'Test Cases', icon: FlaskConical },
-  { href: `${basePath}/executions`, label: 'Executions', icon: PlayCircle },
-  { href: `${basePath}/ai-agent`, label: 'AI Agent', icon: Bot, badge: 'AI' },
-  { href: `${basePath}/settings`, label: 'Settings', icon: Settings },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/projects', label: 'Projects', icon: FolderOpen },
+  { href: '/tests', label: 'Test Cases', icon: FlaskConical },
+  { href: '/executions', label: 'Executions', icon: PlayCircle },
+  { href: '/ai-agent', label: 'AI Agent', icon: Bot, badge: 'AI' },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { sidebarCollapsed, setSidebarCollapsed, user, logout } = useStore();
 
   const isActive = (href: string) => {
-    const path = href.replace(basePath, '') || '/';
-    const currentPath = pathname.replace(basePath, '') || '/';
-    return currentPath === path || (path !== '/' && currentPath.startsWith(path));
+    return pathname === href || (href !== '/' && pathname.startsWith(href));
+  };
+
+  const handleLogout = () => {
+    logout();
+    router.replace('/login');
   };
 
   return (
@@ -118,7 +120,7 @@ export function Sidebar() {
           </div>
         )}
         <button
-          onClick={logout}
+          onClick={handleLogout}
           className={cn(
             'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200',
             sidebarCollapsed && 'justify-center'

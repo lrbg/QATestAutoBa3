@@ -22,7 +22,6 @@ import { Project, TestCase, Execution } from '@/lib/types';
 import { cn, formatRelativeTime, formatDuration, getStatusBg } from '@/lib/utils';
 import { useStore } from '@/store/useStore';
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 export default function ProjectDetailClient() {
   const { id } = useParams<{ id: string }>();
@@ -88,7 +87,7 @@ export default function ProjectDetailClient() {
         subtitle={project.description}
         actions={
           <div className="flex items-center gap-2">
-            <Link href={`${basePath}/settings`}>
+            <Link href="/settings">
               <Button variant="outline" size="sm">
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
@@ -105,7 +104,7 @@ export default function ProjectDetailClient() {
       <div className="p-6 space-y-6">
         {/* Back link */}
         <Link
-          href={`${basePath}/projects`}
+          href="/projects"
           className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-200 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -141,7 +140,7 @@ export default function ProjectDetailClient() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-medium text-gray-300">Test Cases</CardTitle>
-                <Link href={`${basePath}/tests`}>
+                <Link href="/tests">
                   <Button variant="ghost" size="sm" className="text-xs text-gray-400">
                     <Plus className="w-3.5 h-3.5 mr-1" />
                     Add Test
@@ -195,7 +194,7 @@ export default function ProjectDetailClient() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-medium text-gray-300">Recent Executions</CardTitle>
-                <Link href={`${basePath}/executions`}>
+                <Link href="/executions">
                   <Button variant="ghost" size="sm" className="text-xs text-gray-400">
                     View All
                   </Button>

@@ -9,7 +9,6 @@ import { Input } from '@/components/ui/input';
 import { useStore } from '@/store/useStore';
 import { api } from '@/lib/api';
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -29,7 +28,7 @@ export default function LoginPage() {
       const response = await api.login({ email, password });
       setAuth(response.user, response.access_token);
       addNotification({ type: 'success', title: 'Welcome back!', message: `Logged in as ${response.user.name}` });
-      router.replace(`${basePath}/dashboard`);
+      router.replace("/dashboard");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Invalid email or password';
       setError(message);
@@ -98,7 +97,7 @@ export default function LoginPage() {
             <h1 className="text-2xl font-bold text-white">Sign in to your account</h1>
             <p className="text-gray-400 mt-2 text-sm">
               Don&apos;t have an account?{' '}
-              <Link href={`${basePath}/register`} className="text-violet-400 hover:text-violet-300">
+              <Link href="/register" className="text-violet-400 hover:text-violet-300">
                 Create one for free
               </Link>
             </p>
