@@ -213,6 +213,8 @@ class ApiClient {
       return {
         id: `tc-${Date.now()}`,
         ...data,
+        steps: data.steps.map((s, i) => ({ ...s, id: `step-${Date.now()}-${i}` })),
+        status: 'active' as const,
         tenantId: 'tenant-1',
         generatedByAI: false,
         createdAt: new Date().toISOString(),
@@ -227,7 +229,10 @@ class ApiClient {
     if (USE_MOCK) {
       await delay(400);
       const tc = MOCK_TEST_CASES.find((t) => t.id === id)!;
-      return { ...tc, ...data, updatedAt: new Date().toISOString() };
+      const steps = data.steps
+        ? data.steps.map((s, i) => ({ ...s, id: `step-${Date.now()}-${i}` }))
+        : tc.steps;
+      return { ...tc, ...data, steps, updatedAt: new Date().toISOString() };
     }
     const res = await this.client.put<TestCase>(`/test-cases/${id}`, data);
     return res.data;
@@ -335,8 +340,8 @@ class ApiClient {
             name: 'AI Generated: Page Load Test',
             description: `Verify the page at ${data.url} loads correctly`,
             steps: [
-              { order: 1, action: 'navigate', value: data.url, expectedResult: 'Page loads without errors' },
-              { order: 2, action: 'assert', selector: 'body', expectedResult: 'Body is visible' },
+              { id: 's1', order: 1, action: 'navigate', value: data.url, expectedResult: 'Page loads without errors' },
+              { id: 's2', order: 2, action: 'assert', selector: 'body', expectedResult: 'Body is visible' },
             ],
             tags: ['ai-generated', 'smoke'],
             priority: 'medium',
