@@ -30,17 +30,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         working-directory: frontend
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
       - name: Build static export
         working-directory: frontend
         env:
-          NEXT_PUBLIC_API_URL: ${{ vars.API_URL || '' }}
+          NEXT_PUBLIC_API_URL: ''
           NEXT_PUBLIC_USE_MOCK: 'true'
           NEXT_PUBLIC_APP_NAME: 'QA Platform'
           GITHUB_PAGES: 'true'
@@ -54,8 +52,7 @@ jobs:
         run: touch frontend/out/.nojekyll
 
       - name: Add 404.html for SPA routing
-        run: |
-          cp frontend/out/index.html frontend/out/404.html
+        run: cp frontend/out/index.html frontend/out/404.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
